@@ -67,7 +67,7 @@ Matrix *matrix_create(void)
     while (1)
     {
         Matrix *cell = (Matrix *)malloc(sizeof(Matrix));
-        scanf("%d %d %f", &cell->line, &cell->line, &cell->info);
+        scanf("%d %d %f", &cell->line, &cell->column, &cell->info);
 
         if (cell->line == 0)
         {
@@ -106,5 +106,23 @@ Matrix *matrix_create(void)
         temp = curr_col->below;
         curr_col->below = cell;
         cell->below = temp;
+    }
+
+    return origin;
+}
+
+// O print ou o create esta errado? N está mostrando a linha 1
+void matrix_print(Matrix *m) {
+    Matrix* outer_curr = m->right;
+    while (outer_curr->below->column != -1 && outer_curr->below->line != -1)
+    {
+        outer_curr = outer_curr->below;
+
+        Matrix *inner_curr = outer_curr;
+        while (inner_curr->right->column != -1 && inner_curr->right->line != -1)
+        {
+            inner_curr = inner_curr->right;
+            printf("linha: %d coluna: %d info: %f\n", inner_curr->line, inner_curr->column, inner_curr->info);
+        }
     }
 }
