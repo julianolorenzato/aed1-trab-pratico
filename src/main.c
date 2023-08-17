@@ -27,6 +27,7 @@ int main()
 {
     Matrix *m = matrix_create();
     matrix_print(m);
+    matrix_destroy(m);
     // printf("       |");
     // test_column_heads(m);
     // printf("\n");

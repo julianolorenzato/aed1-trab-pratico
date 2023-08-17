@@ -2,25 +2,9 @@
 #include <stdlib.h>
 #include "matrix.h"
 
-// Função auxiliar para percorrer a matriz (não foi pedida, mas foi criada pra reusar o código)
-Matrix *get_cell(Matrix *origin, int line, int column)
-{
-    Matrix *curr = origin;
-
-    // Vai ate a linha especifica;
-    for (int i = 0; i < line; i++)
-    {
-        curr = curr->below;
-    }
-
-    // Vai ate a coluna especifica;
-    for (int i = 0; i < column; i++)
-    {
-        curr = curr->right;
-    }
-
-    return curr;
-}
+// Funções de utilidade
+int count_lines(Matrix *m);
+int count_columns(Matrix *m);
 
 Matrix *matrix_create(void)
 {
@@ -98,7 +82,7 @@ Matrix *matrix_create(void)
         {
             curr_col = curr_col->below;
         }
-        
+
         Matrix *temp = curr_line->right;
         curr_line->right = cell;
         cell->right = temp;
@@ -111,34 +95,62 @@ Matrix *matrix_create(void)
     return origin;
 }
 
-void matrix_print(Matrix *m) {
-    int lines = 0, columns = 0;
+void matrix_destroy(Matrix *m)
+{
+    int lines = count_lines(m);
+    int columns = count_columns(m);
 
-    // Conta a quantidade de linhas
-    Matrix *curr = m;
-    while (curr->below != m)
+    // Libera as células de dentro da matriz
+    Matrix *line_head = m;
+    for (int i = 0; i < lines; i++)
     {
+        line_head = line_head->below;
+
+        Matrix *iterator = line_head->right;
+        while (iterator != line_head)
+        {
+            Matrix *temp = iterator;
+            iterator = iterator->right;
+            free(temp);
+        }
+    }
+
+    // Libera as cabeças de linhas
+    Matrix *curr = m->below;
+    for (int i = 0; i < lines; i++)
+    {
+        Matrix *temp = curr;
         curr = curr->below;
-        lines++;
+        free(temp);
     }
     
-    // Conta a quantidade de colunas
-    curr = m;
-    while (curr->right != m)
+    // Libera as cabeças de colunas
+    curr = m->right;
+    for (int i = 0; i < columns; i++)
     {
+        Matrix *temp = curr;
         curr = curr->right;
-        columns++;
+        free(temp);
     }
+    
+    // Libera a célula origem
+    free(m);
+}
+
+void matrix_print(Matrix *m)
+{
+    int lines = count_lines(m);
+    int columns = count_columns(m);
 
     printf("%d %d\n", lines, columns);
-    
+
     // Percorre as cabeças das linhas
     Matrix *line_head = m;
     for (int i = 0; i < lines; i++)
     {
         line_head = line_head->below;
 
-        // Percorre todas as celulas não vazias de cada linha
+        // Percorre todas as celulas não zeradas de cada linha
         Matrix *iterator = line_head->right;
         while (iterator != line_head)
         {
@@ -148,4 +160,33 @@ void matrix_print(Matrix *m) {
     }
 
     printf("0\n");
+}
+
+
+int count_lines(Matrix *m)
+{
+    int lines = 0;
+
+    Matrix *curr = m;
+    while (curr->below != m)
+    {
+        curr = curr->below;
+        lines++;
+    }
+
+    return lines;
+}
+
+int count_columns(Matrix *m)
+{
+    int columns = 0;
+
+    Matrix *curr = m;
+    while (curr->right != m)
+    {
+        curr = curr->right;
+        columns++;
+    }
+
+    return columns;
 }
