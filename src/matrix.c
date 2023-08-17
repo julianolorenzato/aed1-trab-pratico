@@ -111,18 +111,41 @@ Matrix *matrix_create(void)
     return origin;
 }
 
-// O print ou o create esta errado? N está mostrando a linha 1
 void matrix_print(Matrix *m) {
-    Matrix* outer_curr = m->right;
-    while (outer_curr->below->column != -1 && outer_curr->below->line != -1)
-    {
-        outer_curr = outer_curr->below;
+    int lines = 0, columns = 0;
 
-        Matrix *inner_curr = outer_curr;
-        while (inner_curr->right->column != -1 && inner_curr->right->line != -1)
+    // Conta a quantidade de linhas
+    Matrix *curr = m;
+    while (curr->below != m)
+    {
+        curr = curr->below;
+        lines++;
+    }
+    
+    // Conta a quantidade de colunas
+    curr = m;
+    while (curr->right != m)
+    {
+        curr = curr->right;
+        columns++;
+    }
+
+    printf("%d %d\n", lines, columns);
+    
+    // Percorre as cabeças das linhas
+    Matrix *line_head = m;
+    for (int i = 0; i < lines; i++)
+    {
+        line_head = line_head->below;
+
+        // Percorre todas as celulas não vazias de cada linha
+        Matrix *iterator = line_head->right;
+        while (iterator != line_head)
         {
-            inner_curr = inner_curr->right;
-            printf("linha: %d coluna: %d info: %f\n", inner_curr->line, inner_curr->column, inner_curr->info);
+            printf("%d %d %.1f\n", iterator->line, iterator->column, iterator->info);
+            iterator = iterator->right;
         }
     }
+
+    printf("0\n");
 }
