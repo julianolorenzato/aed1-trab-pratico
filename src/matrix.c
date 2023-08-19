@@ -6,6 +6,7 @@
 int count_lines(Matrix *m);
 int count_columns(Matrix *m);
 void insert_headers(Matrix *origin, int lines, int columns);
+void insert_cell(Matrix *origin, int line, int column, float info);
 
 Matrix *matrix_create(void)
 {
@@ -19,50 +20,16 @@ Matrix *matrix_create(void)
 
     while (1)
     {
-        Matrix *cell = (Matrix *)malloc(sizeof(Matrix));
-        scanf("%d %d %f", &cell->line, &cell->column, &cell->info);
+        int new_cell_line, new_cell_column;
+        float new_cell_info;
 
-        if (cell->line == 0)
-        {
-            free(cell);
+        scanf("%d", &new_cell_line);
+        if (new_cell_line == 0)
             break;
-        }
+        
+        scanf(" %d %f", &new_cell_column, &new_cell_info);
 
-        // Muda a posição de curr_line para baixo até chegar na linha especifica.
-        Matrix *curr_line = origin;
-        for (int i = 0; i < cell->line; i++)
-        {
-            curr_line = curr_line->below;
-        }
-
-        // Muda a posição de curr_line para a direita enquanto o próximo não é uma cabeça ou o próximo é uma coluna maior que o alvo.
-        while ((curr_line->right->column != -1 && curr_line->right->line != -1) || curr_line->right->column > cell->column)
-        {
-            curr_line = curr_line->right;
-        }
-
-        // Muda a posição de curr_col para a direita até chegar na coluna específica.
-        Matrix *curr_col = origin;
-        for (int i = 0; i < cell->column; i++)
-        {
-            curr_col = curr_col->right;
-        }
-
-        // Muda a posição de curr_col para baixo enquanto o próximo não é uma cabeça ou o próximo é uma linha maior que o alvo.
-        while ((curr_col->below->column != -1 && curr_col->below->line != -1) || curr_col->below->line > cell->line)
-        {
-            curr_col = curr_col->below;
-        }
-
-        // Adiciona a nova celula no meio da linha
-        Matrix *temp = curr_line->right;
-        curr_line->right = cell;
-        cell->right = temp;
-
-        // Adiciona a nova célula no meio da coluna.
-        temp = curr_col->below;
-        curr_col->below = cell;
-        cell->below = temp;
+        insert_cell(origin, new_cell_line, new_cell_column, new_cell_info);
     }
 
     return origin;
@@ -135,7 +102,6 @@ void matrix_print(Matrix *m)
     printf("0\n");
 }
 
-// INCOMPLETA
 Matrix *matrix_add(Matrix *m, Matrix *n)
 {
     int lines_m = count_lines(m);
@@ -154,41 +120,39 @@ Matrix *matrix_add(Matrix *m, Matrix *n)
 
     insert_headers(res, lines_m, columns_m);
 
-    Matrix* line_head_m = m;
-    Matrix* line_head_n = n;
-    Matrix* line_head_res = res;
-    for (int i = 0; i < lines_m; i++)
+    Matrix *line_head_m = m;
+    Matrix *line_head_n = n;
+    for (int i = 1; i <= lines_m; i++)
     {
         line_head_m = line_head_m->below;
         line_head_n = line_head_n->below;
-        line_head_res = line_head_res->below;
 
         Matrix *iterator_m = line_head_m;
         Matrix *iterator_n = line_head_n;
-        Matrix *iterator_res = line_head_res;
-        for (int i = 1; i <= columns_m; i++)
+        for (int j = 1; j <= columns_m; j++)
         {
             float info = 0;
 
-            if (iterator_m->right->column == i) {
+            if (iterator_m->right->column == j)
+            {
                 info += iterator_m->right->info;
                 iterator_m = iterator_m->right;
             }
 
-            if (iterator_n->right->column == i) {
+            if (iterator_n->right->column == j)
+            {
                 info += iterator_n->right->info;
                 iterator_n = iterator_n->right;
             }
 
-            if (info != 0) {
-                Matrix *new_cell = (Matrix *)sizeof(Matrix);
-
-                iterator_res->right = new_cell;
+            if (info != 0)
+            {
+                insert_cell(res, i, j, info);
             }
         }
-        
     }
-    
+
+    return res;
 }
 
 // ------------------------- Funções de utilidade -------------------------
@@ -256,4 +220,49 @@ void insert_headers(Matrix *origin, int lines, int columns)
 
     // Finaliza conectando a última célula de cabeça das colunas à celula origem (criando um ciclo).
     curr->right = origin;
+}
+
+// Deve ser usada em uma matrix com headers já inseridos
+void insert_cell(Matrix *origin, int line, int column, float info)
+{
+    Matrix *cell = (Matrix *)malloc(sizeof(Matrix));
+    cell->line = line;
+    cell->column = column;
+    cell->info = info;
+
+    // Muda a posição de curr_line para baixo até chegar na linha especifica.
+    Matrix *curr_line = origin;
+    for (int i = 0; i < cell->line; i++)
+    {
+        curr_line = curr_line->below;
+    }
+
+    // Muda a posição de curr_line para a direita enquanto o próximo não é uma cabeça ou o próximo é uma coluna maior que o alvo.
+    while ((curr_line->right->column != -1 && curr_line->right->line != -1) || curr_line->right->column > cell->column)
+    {
+        curr_line = curr_line->right;
+    }
+
+    // Muda a posição de curr_col para a direita até chegar na coluna específica.
+    Matrix *curr_col = origin;
+    for (int i = 0; i < cell->column; i++)
+    {
+        curr_col = curr_col->right;
+    }
+
+    // Muda a posição de curr_col para baixo enquanto o próximo não é uma cabeça ou o próximo é uma linha maior que o alvo.
+    while ((curr_col->below->column != -1 && curr_col->below->line != -1) || curr_col->below->line > cell->line)
+    {
+        curr_col = curr_col->below;
+    }
+
+    // Adiciona a nova celula no meio da linha
+    Matrix *temp = curr_line->right;
+    curr_line->right = cell;
+    cell->right = temp;
+
+    // Adiciona a nova célula no meio da coluna.
+    temp = curr_col->below;
+    curr_col->below = cell;
+    cell->below = temp;
 }

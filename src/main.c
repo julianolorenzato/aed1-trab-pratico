@@ -25,12 +25,14 @@ void test_line_heads(Matrix *origin) {
 
 int main()
 {
-    Matrix *m = matrix_create();
-    matrix_print(m);
-    matrix_destroy(m);
-    // printf("       |");
-    // test_column_heads(m);
-    // printf("\n");
-    // test_line_heads(m);
+    Matrix *A = matrix_create();
+    matrix_print(A);
+    Matrix *B = matrix_create();
+    matrix_print(B);
+    Matrix *C = matrix_add(A, B);
+    matrix_print(C);
+    matrix_destroy(C);
+    matrix_destroy(A);
+    matrix_destroy(B);
     return 0;
 }
