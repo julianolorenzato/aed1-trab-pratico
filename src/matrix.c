@@ -7,6 +7,8 @@ int count_lines(Matrix *m);
 int count_columns(Matrix *m);
 void insert_headers(Matrix *origin, int lines, int columns);
 void insert_cell(Matrix *origin, int line, int column, float info);
+Matrix *getprev_col(Matrix *origin, int x, int y);
+Matrix *getprev_line(Matrix *origin, int x, int y);
 
 Matrix *matrix_create(void)
 {
@@ -26,7 +28,7 @@ Matrix *matrix_create(void)
         scanf("%d", &new_cell_line);
         if (new_cell_line == 0)
             break;
-        
+
         scanf(" %d %f", &new_cell_column, &new_cell_info);
 
         insert_cell(origin, new_cell_line, new_cell_column, new_cell_info);
@@ -155,6 +157,129 @@ Matrix *matrix_add(Matrix *m, Matrix *n)
     return res;
 }
 
+// TESTAR COM matrix_getelem()
+Matrix *matrix_multiply(Matrix *m, Matrix *n)
+{
+    int lines_m = count_lines(m);
+    int columns_m = count_columns(m);
+
+    int lines_n = count_lines(n);
+    int columns_n = count_columns(n);
+
+    if (columns_m != lines_n)
+    {
+        printf("O numero de colunas da primeira matriz deve ser igual ao numero de linhas da segunda matriz\n");
+        return NULL;
+    }
+
+    Matrix *res = (Matrix *)malloc(sizeof(Matrix));
+
+    insert_headers(res, lines_m, columns_n);
+
+    // Percorre todas as linhas da matriz resultante
+    for (int line = 1; line <= lines_m; line++)
+    {
+        // Percorre todas as colunas da matriz resultante
+        for (int col = 1; col <= columns_n; col++)
+        {
+            float res_info = 0;
+
+            // Para cada celula da matriz resultante soma os produtos das linhas da matriz m com as colunas da matriz n
+            for (int k = 1; k < columns_m /* poderia ser lines_n aqui pois é igual */; k++)
+            {
+                float elem1 = matrix_getelem(m, line, k);
+                float elem2 = matrix_getelem(n, k, col);
+
+                res_info += elem1 * elem2;
+            }
+
+            if (res_info != 0)
+            {
+                insert_cell(res, line, col, res_info);
+            }
+        }
+    }
+
+    return res;
+}
+
+Matrix *matrix_transpose(Matrix *m)
+{
+    int col = count_lines(m);
+    int lines = count_columns(m);
+
+    Matrix *line_head, *iterator, *transposta = malloc(sizeof(Matrix));
+    insert_headers(transposta, lines, col);
+
+    line_head = m;
+    for (int i = 0; i < lines; i++)
+    {
+        line_head = line_head->below;
+
+        // Percorre todas as celulas não zeradas de cada linha
+        iterator = line_head->right;
+        while (iterator != line_head)
+        {
+            matrix_setelem(transposta, iterator->column, iterator->line, iterator->info);
+            iterator = iterator->right;
+        }
+    }
+    return transposta;
+}
+
+float matrix_getelem(Matrix *m, int x, int y)
+{
+    for (int i = 0; i < x; i++)
+    {
+        m = m->below;
+    }
+
+    while ((m->right->column != -1 && m->right->line != -1) || m->right->column > x)
+    {
+        m = m->right;
+        if (m->column == y)
+        {
+            return m->info;
+        }
+    }
+
+    return 0.0;
+}
+
+void matrix_setelem(Matrix *m, int x, int y, float elem)
+{
+    Matrix *aux, *prev_col, *prev_line;
+    aux = m;
+
+    for (int i = 0; i < x; i++)
+    {
+        aux = aux->below;
+    }
+
+    while ((aux->right->column != -1 && aux->right->line != -1) || aux->right->column > x)
+    {
+        aux = aux->right;
+        if (aux->column == y)
+        {
+            aux->info = elem;
+            return;
+        }
+    }
+
+    Matrix *new = malloc(sizeof(Matrix));
+
+    prev_col = getprev_col(m, x, y);
+    prev_line = getprev_line(m, x, y);
+
+    new->info = elem;
+    new->line = x;
+    new->column = y;
+    new->below = prev_col->below;
+    new->right = prev_line->right;
+    prev_col->below = new;
+    prev_line->right = new;
+}
+
 // ------------------------- Funções de utilidade -------------------------
 
 int count_lines(Matrix *m)
@@ -265,4 +390,38 @@ void insert_cell(Matrix *origin, int line, int column, float info)
     temp = curr_col->below;
     curr_col->below = cell;
     cell->below = temp;
+}
+
+Matrix *getprev_col(Matrix *origin, int x, int y)
+{
+    // Muda a posição de curr_col para a direita até chegar na coluna específica.
+    Matrix *curr_col = origin;
+    for (int i = 0; i < y; i++)
+    {
+        curr_col = curr_col->right;
+    }
+
+    // Muda a posição de curr_col para baixo enquanto o próximo não é uma cabeça ou o próximo é uma linha maior que o alvo.
+    while ((curr_col->below->column != -1 && curr_col->below->line != -1) || curr_col->below->line > x)
+    {
+        curr_col = curr_col->below;
+    }
+    return curr_col;
+}
+
+Matrix *getprev_line(Matrix *origin, int x, int y)
+{
+    // Muda a posição de curr_line para baixo até chegar na linha especifica.
+    Matrix *curr_line = origin;
+    for (int i = 0; i < x; i++)
+    {
+        curr_line = curr_line->below;
+    }
+
+    // Muda a posição de curr_line para a direita enquanto o próximo não é uma cabeça ou o próximo é uma coluna maior que o alvo.
+    while ((curr_line->right->column != -1 && curr_line->right->line != -1) || curr_line->right->column > y)
+    {
+        curr_line = curr_line->right;
+    }
+    return curr_line;
 }
