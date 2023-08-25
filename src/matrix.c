@@ -246,38 +246,50 @@ float matrix_getelem(Matrix *m, int x, int y)
     return 0.0;
 }
 
-void matrix_setelem(Matrix *m, int x, int y, float elem)
+void matrix_setelem(Matrix *m, int line, int column, float elem)
 {
     Matrix *aux, *prev_col, *prev_line;
     aux = m;
 
-    for (int i = 0; i < x; i++)
+    for (int i = 0; i < line; i++)
     {
         aux = aux->below;
     }
 
-    while ((aux->right->column != -1 && aux->right->line != -1) || aux->right->column > x)
+    while ((aux->right->column != -1 && aux->right->line != -1) || aux->right->column > line)
     {
         aux = aux->right;
-        if (aux->column == y)
+        if (aux->column == column)
         {
-            aux->info = elem;
-            return;
+            break;
         }
     }
 
-    Matrix *new = malloc(sizeof(Matrix));
+    if (aux->column == column && aux->line == line)
+    {
+        // Se encontrar a célula e o valor a ser colocado for 0 a célula será destruída
+        if (elem == 0)
+        {
+            prev_col = getprev_col(m, line, column);
+            prev_line = getprev_line(m, line, column);
+            aux = prev_line->right;
 
-    prev_col = getprev_col(m, x, y);
-    prev_line = getprev_line(m, x, y);
+            prev_col->below = aux->below;
+            prev_line->right = aux->right;
 
-    new->info = elem;
-    new->line = x;
-    new->column = y;
-    new->below = prev_col->below;
-    new->right = prev_line->right;
-    prev_col->below = new;
-    prev_line->right = new;
+            free(aux);
+        }
+        else
+        {
+            aux->info = elem;
+        }
+        return;
+    }
+
+    if (elem != 0)
+    {
+        insert_cell(m, line, column, elem);
+    }
 }
 
 // ------------------------- Funções de utilidade -------------------------
@@ -392,35 +404,43 @@ void insert_cell(Matrix *origin, int line, int column, float info)
     cell->below = temp;
 }
 
-Matrix *getprev_col(Matrix *origin, int x, int y)
+Matrix *getprev_col(Matrix *origin, int line, int column)
 {
     // Muda a posição de curr_col para a direita até chegar na coluna específica.
     Matrix *curr_col = origin;
-    for (int i = 0; i < y; i++)
+    for (int i = 0; i < column; i++)
     {
         curr_col = curr_col->right;
     }
-
     // Muda a posição de curr_col para baixo enquanto o próximo não é uma cabeça ou o próximo é uma linha maior que o alvo.
-    while ((curr_col->below->column != -1 && curr_col->below->line != -1) || curr_col->below->line > x)
+    while ((curr_col->below->column != -1 && curr_col->below->line != -1) || curr_col->below->line >= line)
     {
+        if (curr_col->below->line == line && curr_col->below->column == column)
+        {
+            break;
+        }
         curr_col = curr_col->below;
     }
     return curr_col;
 }
 
-Matrix *getprev_line(Matrix *origin, int x, int y)
+// Retorna a celula anterior na linha em relação a posição especificada
+Matrix *getprev_line(Matrix *origin, int line, int column)
 {
     // Muda a posição de curr_line para baixo até chegar na linha especifica.
     Matrix *curr_line = origin;
-    for (int i = 0; i < x; i++)
+    for (int i = 0; i < line; i++)
     {
         curr_line = curr_line->below;
     }
 
     // Muda a posição de curr_line para a direita enquanto o próximo não é uma cabeça ou o próximo é uma coluna maior que o alvo.
-    while ((curr_line->right->column != -1 && curr_line->right->line != -1) || curr_line->right->column > y)
+    while ((curr_line->right->column != -1 && curr_line->right->line != -1) || curr_line->right->column >= column)
     {
+        if (curr_line->right->line == line && curr_line->right->column == column)
+        {
+            break;
+        }
         curr_line = curr_line->right;
     }
     return curr_line;
