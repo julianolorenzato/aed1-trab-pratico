@@ -157,7 +157,6 @@ Matrix *matrix_add(Matrix *m, Matrix *n)
     return res;
 }
 
-// TESTAR COM matrix_getelem()
 Matrix *matrix_multiply(Matrix *m, Matrix *n)
 {
     int lines_m = count_lines(m);
@@ -179,18 +178,23 @@ Matrix *matrix_multiply(Matrix *m, Matrix *n)
     // Percorre todas as linhas da matriz resultante
     for (int line = 1; line <= lines_m; line++)
     {
+        printf("line %d--------------------\n", line);
+
         // Percorre todas as colunas da matriz resultante
         for (int col = 1; col <= columns_n; col++)
         {
+            printf("col %d\n", col);
             float res_info = 0;
 
             // Para cada celula da matriz resultante soma os produtos das linhas da matriz m com as colunas da matriz n
-            for (int k = 1; k < columns_m /* poderia ser lines_n aqui pois é igual */; k++)
+            for (int k = 1; k <= columns_m /* poderia ser lines_n aqui pois é igual */; k++)
             {
                 float elem1 = matrix_getelem(m, line, k);
                 float elem2 = matrix_getelem(n, k, col);
 
+
                 res_info += elem1 * elem2;
+                printf("elem 1 e 2 %.1f %.1f res: %1.f \n", elem1, elem2, res_info);
             }
 
             if (res_info != 0)
