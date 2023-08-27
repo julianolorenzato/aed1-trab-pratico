@@ -30,6 +30,8 @@ Matrix *matrix_create(void)
             break;
 
         scanf(" %d %f", &new_cell_column, &new_cell_info);
+        if (new_cell_info == 0)
+            continue;
 
         insert_cell(origin, new_cell_line, new_cell_column, new_cell_info);
     }
@@ -39,6 +41,12 @@ Matrix *matrix_create(void)
 
 void matrix_destroy(Matrix *m)
 {
+    if (m == NULL)
+    {
+        printf("Matriz m nao pode ser nula\n");
+        return;
+    }
+
     int lines = count_lines(m);
     int columns = count_columns(m);
 
@@ -81,6 +89,12 @@ void matrix_destroy(Matrix *m)
 
 void matrix_print(Matrix *m)
 {
+    if (m == NULL)
+    {
+        printf("Matriz m nao pode ser nula\n");
+        return;
+    }
+
     int lines = count_lines(m);
     int columns = count_columns(m);
 
@@ -106,6 +120,18 @@ void matrix_print(Matrix *m)
 
 Matrix *matrix_add(Matrix *m, Matrix *n)
 {
+    if (m == NULL)
+    {
+        printf("Matriz m nao pode ser nula\n");
+        return NULL;
+    }
+
+    if (n == NULL)
+    {
+        printf("Matriz n nao pode ser nula\n");
+        return NULL;
+    }
+
     int lines_m = count_lines(m);
     int columns_m = count_columns(m);
 
@@ -114,7 +140,7 @@ Matrix *matrix_add(Matrix *m, Matrix *n)
 
     if (lines_m != lines_n || columns_m != columns_n)
     {
-        printf("As matrizes devem ter as mesmas dimensoes");
+        printf("As matrizes devem ter as mesmas dimensoes\n");
         return NULL;
     }
 
@@ -159,6 +185,18 @@ Matrix *matrix_add(Matrix *m, Matrix *n)
 
 Matrix *matrix_multiply(Matrix *m, Matrix *n)
 {
+    if (m == NULL)
+    {
+        printf("Matriz m nao pode ser nula\n");
+        return NULL;
+    }
+
+    if (n == NULL)
+    {
+        printf("Matriz n nao pode ser nula\n");
+        return NULL;
+    }
+
     int lines_m = count_lines(m);
     int columns_m = count_columns(m);
 
@@ -178,12 +216,10 @@ Matrix *matrix_multiply(Matrix *m, Matrix *n)
     // Percorre todas as linhas da matriz resultante
     for (int line = 1; line <= lines_m; line++)
     {
-        printf("line %d--------------------\n", line);
-
+        printf("LINHA: %d\n", line);
         // Percorre todas as colunas da matriz resultante
         for (int col = 1; col <= columns_n; col++)
         {
-            printf("col %d\n", col);
             float res_info = 0;
 
             // Para cada celula da matriz resultante soma os produtos das linhas da matriz m com as colunas da matriz n
@@ -192,9 +228,7 @@ Matrix *matrix_multiply(Matrix *m, Matrix *n)
                 float elem1 = matrix_getelem(m, line, k);
                 float elem2 = matrix_getelem(n, k, col);
 
-
                 res_info += elem1 * elem2;
-                printf("elem 1 e 2 %.1f %.1f res: %1.f \n", elem1, elem2, res_info);
             }
 
             if (res_info != 0)
@@ -209,6 +243,12 @@ Matrix *matrix_multiply(Matrix *m, Matrix *n)
 
 Matrix *matrix_transpose(Matrix *m)
 {
+    if (m == NULL)
+    {
+        printf("Matriz m nao pode ser nula\n");
+        return NULL;
+    }
+
     int col = count_lines(m);
     int lines = count_columns(m);
 
@@ -233,6 +273,12 @@ Matrix *matrix_transpose(Matrix *m)
 
 float matrix_getelem(Matrix *m, int x, int y)
 {
+    if (m == NULL)
+    {
+        printf("Matriz m nao pode ser nula\n");
+        return 0;
+    }
+
     for (int i = 0; i < x; i++)
     {
         m = m->below;
@@ -252,6 +298,12 @@ float matrix_getelem(Matrix *m, int x, int y)
 
 void matrix_setelem(Matrix *m, int line, int column, float elem)
 {
+    if (m == NULL)
+    {
+        printf("Matriz m nao pode ser nula\n");
+        return;
+    }
+
     Matrix *aux, *prev_col, *prev_line;
     aux = m;
 
