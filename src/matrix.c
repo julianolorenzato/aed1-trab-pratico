@@ -423,31 +423,9 @@ void insert_cell(Matrix *origin, int line, int column, float info)
     cell->column = column;
     cell->info = info;
 
-    // Muda a posição de curr_line para baixo até chegar na linha especifica.
-    Matrix *curr_line = origin;
-    for (int i = 0; i < cell->line; i++)
-    {
-        curr_line = curr_line->below;
-    }
+    Matrix *curr_line = getprev_line(origin, line, column);
 
-    // Muda a posição de curr_line para a direita enquanto o próximo não é uma cabeça ou o próximo é uma coluna maior que o alvo.
-    while ((curr_line->right->column != -1 && curr_line->right->line != -1) || curr_line->right->column > cell->column)
-    {
-        curr_line = curr_line->right;
-    }
-
-    // Muda a posição de curr_col para a direita até chegar na coluna específica.
-    Matrix *curr_col = origin;
-    for (int i = 0; i < cell->column; i++)
-    {
-        curr_col = curr_col->right;
-    }
-
-    // Muda a posição de curr_col para baixo enquanto o próximo não é uma cabeça ou o próximo é uma linha maior que o alvo.
-    while ((curr_col->below->column != -1 && curr_col->below->line != -1) || curr_col->below->line > cell->line)
-    {
-        curr_col = curr_col->below;
-    }
+    Matrix *curr_col = getprev_col(origin, line, column);
 
     // Adiciona a nova celula no meio da linha
     Matrix *temp = curr_line->right;
